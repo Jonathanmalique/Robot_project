@@ -25,7 +25,7 @@ typedef struct {
 } MessageToMon;
 
 void set_msgToMon_header(MessageToMon *msg, char *header);
-void set_msgToMon_data(MessageToMon *msg, void * data);
+void set_msgToMon_data(MessageToMon *msg, void *data);
 void free_msgToMon_data(MessageToMon *msg);
 void print_msgToMon(MessageToMon *msg);
 

@@ -25,7 +25,7 @@ int open_communication_robot(const char * path)
         tcsetattr(fd, TCSANOW, &options);
         return 0;
     }
-    else
+    else 
     {
         perror("can't openSerial");
         return -1;
@@ -131,8 +131,6 @@ int sendCmd(char cmd, const char * arg)
             break;
         case DMB_TURN:   strcat(cmdWithArg,"=");
             strcat(cmdWithArg,arg);
-            break;
-        case DMB_GET_VBAT:   strcat(cmdWithArg,"=");
             break;
     }
     int sizeCmd = strlen(cmdWithArg);
