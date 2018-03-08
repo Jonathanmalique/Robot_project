@@ -228,18 +228,31 @@ void f_checkBattery(void *arg) {
 
     /* PERIODIC START*/
     rt_task_set_periodic(NULL, TM_NOW, 500000000);
-    int levelBat =-1;
+    #ifdef _WITH_TRACE_
+        printf("MAAAAAAAAAAAAAAAAAARRRRRCCCCCHHHHHHHHHHHHEEEEEEEEEEE");
+    #endif
+    int levelBat =DMB_BAT_LOW;
     while (1) {
         rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
         if (robotStarted) {
             levelBat = send_command_to_robot(DMB_GET_VBAT);
-            }
-        rt_mutex_release(&mutex_robotStarted);
+            #ifdef _WITH_TRACE_
+        printf("niveau batterie: %d \n",levelBat);
+        #endif
         //f_sendToMon(HEADER_STM_BAT,levelBat);
         MessageToMon msg;
         set_msgToMon_header(&msg, HEADER_STM_BAT);
         set_msgToMon_data(&msg, &levelBat); 
+        #ifdef _WITH_TRACE_
+        printf("coucou\n");
+        #endif
         write_in_queue(&q_messageToMon, msg);
+        #ifdef _WITH_TRACE_
+        printf("coucou2\n");
+        #endif
+           }
+        
+        rt_mutex_release(&mutex_robotStarted);
     }
 }
 
