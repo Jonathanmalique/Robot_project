@@ -36,6 +36,7 @@ extern RT_TASK th_receiveFromMon;
 extern RT_TASK th_openComRobot;
 extern RT_TASK th_startRobot;
 extern RT_TASK th_move;
+extern RT_TASK th_checkBattery;
 
 extern RT_MUTEX mutex_robotStarted;
 extern RT_MUTEX mutex_move;
@@ -50,6 +51,7 @@ extern RT_QUEUE q_messageToMon;
 extern int etatCommMoniteur;
 extern int robotStarted;
 extern char move;
+//extern int levelBat;
 
 extern int MSG_QUEUE_SIZE;
 
@@ -59,6 +61,7 @@ extern int PRIORITY_TMOVE;
 extern int PRIORITY_TSENDTOMON;
 extern int PRIORITY_TRECEIVEFROMMON;
 extern int PRIORITY_TSTARTROBOT;
+extern int PRIORITY_TCHECKBATTERY;
 
 void f_server(void *arg);
 void f_sendToMon(void *arg);
@@ -66,6 +69,7 @@ void f_receiveFromMon(void *arg);
 void f_openComRobot(void * arg);
 void f_move(void *arg);
 void f_startRobot(void *arg);
+void f_checkBattery(void *arg);
 
 #endif /* FUNCTIONS_H */
 

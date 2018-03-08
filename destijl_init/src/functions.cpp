@@ -192,6 +192,7 @@ void f_move(void *arg) {
 
     /* PERIODIC START */
 #ifdef _WITH_TRACE_
+   
     printf("%s: start period\n", info.name);
 #endif
     rt_task_set_periodic(NULL, TM_NOW, 100000000);
@@ -217,9 +218,36 @@ void f_move(void *arg) {
     }
 }
 
+
+void f_checkBattery(void *arg) {
+    /* INIT*/
+    RT_TASK_INFO info;
+    rt_task_inquire(NULL, &info);
+    printf("Init %s\n", info.name);
+    rt_sem_p(&sem_barrier, TM_INFINITE);
+
+    /* PERIODIC START*/
+    rt_task_set_periodic(NULL, TM_NOW, 500000000);
+    int levelBat =-1;
+    while (1) {
+        rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
+        if (robotStarted) {
+            levelBat = send_command_to_robot(DMB_GET_VBAT);
+            }
+        rt_mutex_release(&mutex_robotStarted);
+        //f_sendToMon(HEADER_STM_BAT,levelBat);
+        MessageToMon msg;
+        set_msgToMon_header(&msg, HEADER_STM_BAT);
+        set_msgToMon_data(&msg, &levelBat); 
+        write_in_queue(&q_messageToMon, msg);
+    }
+}
+
+
 void write_in_queue(RT_QUEUE *queue, MessageToMon msg) {
     void *buff;
     buff = rt_queue_alloc(&q_messageToMon, sizeof (MessageToMon));
     memcpy(buff, &msg, sizeof (MessageToMon));
     rt_queue_send(&q_messageToMon, buff, sizeof (MessageToMon), Q_NORMAL);
 }
+
