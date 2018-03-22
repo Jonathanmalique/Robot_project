@@ -27,6 +27,7 @@ RT_TASK th_startRobot;
 RT_TASK th_move;
 RT_TASK th_checkBattery;
 
+
 // Déclaration des priorités des taches
 int PRIORITY_TSERVER = 30;
 int PRIORITY_TOPENCOMROBOT = 20;
