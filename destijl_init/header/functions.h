@@ -37,6 +37,7 @@ extern RT_TASK th_openComRobot;
 extern RT_TASK th_startRobot;
 extern RT_TASK th_move;
 extern RT_TASK th_checkBattery;
+extern RT_TASK th_openCamera;
 
 extern RT_MUTEX mutex_robotStarted;
 extern RT_MUTEX mutex_move;
@@ -62,6 +63,7 @@ extern int PRIORITY_TSENDTOMON;
 extern int PRIORITY_TRECEIVEFROMMON;
 extern int PRIORITY_TSTARTROBOT;
 extern int PRIORITY_TCHECKBATTERY;
+extern int PRIORITY_TOPENCAMERA;
 
 void f_server(void *arg);
 void f_sendToMon(void *arg);
@@ -70,6 +72,7 @@ void f_openComRobot(void * arg);
 void f_move(void *arg);
 void f_startRobot(void *arg);
 void f_checkBattery(void *arg);
+void f_openCamera(void *arg);
 
 #endif /* FUNCTIONS_H */
 

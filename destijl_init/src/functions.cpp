@@ -88,7 +88,8 @@ void f_receiveFromMon(void *arg) {
 #endif
                 rt_sem_v(&sem_openComRobot);
             }
-        } else if (strcmp(msg.header, HEADER_MTS_DMB_ORDER) == 0) {
+        } 
+        else if (strcmp(msg.header, HEADER_MTS_DMB_ORDER) == 0) {
             if (msg.data[0] == DMB_START_WITHOUT_WD) { // Start robot
 #ifdef _WITH_TRACE_
                 printf("%s: message start robot\n", info.name);
@@ -110,6 +111,14 @@ void f_receiveFromMon(void *arg) {
 
             }
         }
+        else if (strcmp(msg.header, HEADER_MTS_CAMERA) == 0) {
+            if (msg.data[0] == CAM_OPEN) { // Open camera
+#ifdef _WITH_TRACE_
+                printf("%s: message open Camera\n", info.name);
+#endif
+                rt_sem_v(&sem_openCamera);
+            }
+        } 
     } while (err > 0);
 
 }
@@ -253,6 +262,44 @@ void f_checkBattery(void *arg) {
            }
         
         rt_mutex_release(&mutex_robotStarted);
+    }
+}
+
+
+void f_openCamera(void * arg) {
+    int err;
+
+    /* INIT */
+    RT_TASK_INFO info;
+    rt_task_inquire(NULL, &info);
+    printf("Init %s\n", info.name);
+    rt_sem_p(&sem_barrier, TM_INFINITE);
+
+    while (1) {
+#ifdef _WITH_TRACE_
+        printf("%s : Wait sem_openCamera\n", info.name);
+#endif
+        rt_sem_p(&sem_openCamera, TM_INFINITE);
+#ifdef _WITH_TRACE_
+        printf("%s : sem_openCamera arrived => open communication camera\n", info.name);
+#endif
+        err = open_camera();
+        if (err == 0) {
+        rt_mutex_acquire(&mutex_CameraOpened, TM_INFINITE);
+#ifdef _WITH_TRACE_
+            printf("%s : the camera is opened\n", info.name);
+#endif
+            CameraOpened = 1;
+            MessageToMon msg;
+            set_msgToMon_header(&msg, HEADER_STM_ACK);
+            write_in_queue(&q_messageToMon, msg);
+        } else {
+            CameraOpened = 0;
+            MessageToMon msg;
+            set_msgToMon_header(&msg, HEADER_STM_NO_ACK);
+            write_in_queue(&q_messageToMon, msg);
+        }
+        rt_mutex_release(&mutex_CameraOpened);
     }
 }
 
