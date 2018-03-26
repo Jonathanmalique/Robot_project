@@ -27,6 +27,7 @@ RT_TASK th_startRobot;
 RT_TASK th_move;
 RT_TASK th_checkBattery;
 RT_TASK th_openCamera;
+RT_TASK th_treatImage;
 
 
 // Déclaration des priorités des taches
@@ -38,10 +39,12 @@ int PRIORITY_TRECEIVEFROMMON = 22;
 int PRIORITY_TSTARTROBOT = 20;
 int PRIORITY_TCHECKBATTERY = 10;
 int PRIORITY_TOPENCAMERA = 21;
+int PRIORITY_TTREATIMAGE = 10;
 
 RT_MUTEX mutex_robotStarted;
 RT_MUTEX mutex_move;
 RT_MUTEX mutex_CameraOpened;
+RT_MUTEX mutex_Mode;
 
 // Déclaration des sémaphores
 RT_SEM sem_barrier;
@@ -60,6 +63,7 @@ int etatCommMoniteur = 1;
 int robotStarted = 0;
 char move = DMB_STOP_MOVE;
 int CameraOpened = 0;
+char Mode = Image;
 
 /**
  * \fn void initStruct(void)
@@ -163,6 +167,11 @@ void initStruct(void) {
         exit(EXIT_FAILURE);
     }
 
+     if (err = rt_task_create(&th_treatImage, "th_treatImage", 0, PRIORITY_TTREATIMAGE, 0)) {
+        printf("Error task create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+    
     /* Creation des files de messages */
     if (err = rt_queue_create(&q_messageToMon, "toto", MSG_QUEUE_SIZE * sizeof (MessageToRobot), MSG_QUEUE_SIZE, Q_FIFO)) {
         printf("Error msg queue create: %s\n", strerror(-err));
@@ -207,6 +216,10 @@ void startTasks() {
         printf("Error task start: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
+    if (err = rt_task_start(&th_treatImage, &f_treatImage, NULL)) {
+        printf("Error task start: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
 }
 
 void deleteTasks() {
@@ -214,4 +227,5 @@ void deleteTasks() {
     rt_task_delete(&th_openComRobot);
     rt_task_delete(&th_openCamera);
     rt_task_delete(&th_move);
+    rt_task_delete(&th_treatImage);
 }

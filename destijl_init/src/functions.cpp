@@ -118,6 +118,31 @@ void f_receiveFromMon(void *arg) {
 #endif
                 rt_sem_v(&sem_openCamera);
             }
+            else if (msg.data[0] == CAM_COMPUTE_POSITION) { //Passe en Mode Calcul de Position
+               rt_mutex_acquire(&mutex_Mode, TM_INFINITE);
+               Mode = Position;
+               rt_mutex_release(&mutex_Mode); 
+            }
+            else if (msg.data[0] == CAM_STOP_COMPUTE_POSITION) { //Stoppe le Calcul de la Position
+               rt_mutex_acquire(&mutex_Mode, TM_INFINITE);
+               Mode = Image;
+               rt_mutex_release(&mutex_Mode); 
+            }
+            else if (msg.data[0] == CAM_ASK_ARENA) { //Lance la détection d'Arène
+               rt_mutex_acquire(&mutex_Mode, TM_INFINITE);
+               Mode = DetectArena;
+               rt_mutex_release(&mutex_Mode); 
+            }
+            else if (msg.data[0] == CAM_ARENA_INFIRM) {
+               rt_mutex_acquire(&mutex_Mode, TM_INFINITE);
+               Mode = ArenaNok;
+               rt_mutex_release(&mutex_Mode); 
+            }
+            else if (msg.data[0] == CAM_ARENA_CONFIRM) {
+               rt_mutex_acquire(&mutex_Mode, TM_INFINITE);
+               Mode = ArenaOk;
+               rt_mutex_release(&mutex_Mode); 
+            }
         } 
     } while (err > 0);
 
@@ -309,5 +334,23 @@ void write_in_queue(RT_QUEUE *queue, MessageToMon msg) {
     buff = rt_queue_alloc(&q_messageToMon, sizeof (MessageToMon));
     memcpy(buff, &msg, sizeof (MessageToMon));
     rt_queue_send(&q_messageToMon, buff, sizeof (MessageToMon), Q_NORMAL);
+}
+
+
+void f_treatImage (void * arg) {
+    
+    
+    /* INIT */
+    RT_TASK_INFO info;
+    rt_task_inquire(NULL, &info);
+    printf("Init %s\n", info.name);
+    rt_sem_p(&sem_barrier, TM_INFINITE);
+
+    while (1) {
+#ifdef _WITH_TRACE_
+        printf("%s :\n", info.name);
+#endif
+         
+    }
 }
 
