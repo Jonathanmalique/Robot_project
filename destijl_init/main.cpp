@@ -63,7 +63,11 @@ int etatCommMoniteur = 1;
 int robotStarted = 0;
 char move = DMB_STOP_MOVE;
 int CameraOpened = 0;
-char Mode = Image;
+int Mode = IMAGE;
+Camera Ma_Camera;
+Image Mon_Image;
+Arene Mon_Arene;
+Position Ma_Position;
 
 /**
  * \fn void initStruct(void)
@@ -113,6 +117,14 @@ void initStruct(void) {
         printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
+    if (err = rt_mutex_create(&mutex_cameraOpened, NULL)) {
+        printf("Error mutex create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+    if (err = rt_mutex_create(&mutex_Mode, NULL)) {
+        printf("Error mutex create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
 
     /* Creation du semaphore */
     if (err = rt_sem_create(&sem_barrier, NULL, 0, S_FIFO)) {
@@ -128,6 +140,10 @@ void initStruct(void) {
         exit(EXIT_FAILURE);
     }
     if (err = rt_sem_create(&sem_startRobot, NULL, 0, S_FIFO)) {
+        printf("Error semaphore create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+    if (err = rt_sem_create(&sem_openCamera, NULL, 0, S_FIFO)) {
         printf("Error semaphore create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }

@@ -120,27 +120,27 @@ void f_receiveFromMon(void *arg) {
             }
             else if (msg.data[0] == CAM_COMPUTE_POSITION) { //Passe en Mode Calcul de Position
                rt_mutex_acquire(&mutex_Mode, TM_INFINITE);
-               Mode = Position;
+               Mode = POSITION;
                rt_mutex_release(&mutex_Mode); 
             }
             else if (msg.data[0] == CAM_STOP_COMPUTE_POSITION) { //Stoppe le Calcul de la Position
                rt_mutex_acquire(&mutex_Mode, TM_INFINITE);
-               Mode = Image;
+               Mode = IMAGE;
                rt_mutex_release(&mutex_Mode); 
             }
             else if (msg.data[0] == CAM_ASK_ARENA) { //Lance la détection d'Arène
                rt_mutex_acquire(&mutex_Mode, TM_INFINITE);
-               Mode = DetectArena;
+               Mode = DETECT_ARENA;
                rt_mutex_release(&mutex_Mode); 
             }
             else if (msg.data[0] == CAM_ARENA_INFIRM) {
                rt_mutex_acquire(&mutex_Mode, TM_INFINITE);
-               Mode = ArenaNok;
+               Mode = ARENA_NOK;
                rt_mutex_release(&mutex_Mode); 
             }
             else if (msg.data[0] == CAM_ARENA_CONFIRM) {
                rt_mutex_acquire(&mutex_Mode, TM_INFINITE);
-               Mode = ArenaOk;
+               Mode = ARENA_OK;
                rt_mutex_release(&mutex_Mode); 
             }
         } 
@@ -267,6 +267,7 @@ void f_checkBattery(void *arg) {
     #endif
     int levelBat =DMB_BAT_LOW;
     while (1) {
+        rt_task_wait_period(NULL);
         rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
         if (robotStarted) {
             levelBat = send_command_to_robot(DMB_GET_VBAT);
@@ -308,9 +309,9 @@ void f_openCamera(void * arg) {
 #ifdef _WITH_TRACE_
         printf("%s : sem_openCamera arrived => open communication camera\n", info.name);
 #endif
-        err = open_camera();
+        err = open_camera(&Ma_Camera);
         if (err == 0) {
-        rt_mutex_acquire(&mutex_CameraOpened, TM_INFINITE);
+        rt_mutex_acquire(&mutex_cameraOpened, TM_INFINITE);
 #ifdef _WITH_TRACE_
             printf("%s : the camera is opened\n", info.name);
 #endif
@@ -324,7 +325,7 @@ void f_openCamera(void * arg) {
             set_msgToMon_header(&msg, HEADER_STM_NO_ACK);
             write_in_queue(&q_messageToMon, msg);
         }
-        rt_mutex_release(&mutex_CameraOpened);
+        rt_mutex_release(&mutex_cameraOpened);
     }
 }
 
@@ -345,12 +346,33 @@ void f_treatImage (void * arg) {
     rt_task_inquire(NULL, &info);
     printf("Init %s\n", info.name);
     rt_sem_p(&sem_barrier, TM_INFINITE);
-
+    
+    rt_task_set_periodic(NULL, TM_NOW, 100000000);
+    
     while (1) {
-#ifdef _WITH_TRACE_
-        printf("%s :\n", info.name);
-#endif
-         
+        rt_mutex_acquire(&mutex_cameraOpened, TM_INFINITE);
+        if (CameraOpened){
+            rt_mutex_acquire(&mutex_Mode, TM_INFINITE);
+            switch (Mode) {
+                case POSITION :
+                    rt_task_wait_period(NULL);
+                    get_image(&Ma_Camera, &Mon_Image);
+                    
+                    break;
+                case DETECT_ARENA :
+                    break;
+                case WAITING :
+                    break;
+                case ARENA_OK :
+                    break;
+                case ARENA_NOK :
+                    break;
+                case IMAGE :
+                    break; 
+            }
+            rt_mutex_release(&mutex_Mode);
+        }
+        rt_mutex_release(&mutex_cameraOpened); 
     }
 }
 

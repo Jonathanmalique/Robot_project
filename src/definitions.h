@@ -53,5 +53,13 @@
 #define DMB_BUSY 1
 #define DMB_DO_NOTHING 0
 
+#define IMAGE 3
+#define POSITION 4
+#define DETECT_ARENA 5
+#define ARENA_NOK 6
+#define ARENA_OK 7
+#define WAITING 8
+
+
 #endif /* MSG_H */
 

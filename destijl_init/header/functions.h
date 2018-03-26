@@ -43,18 +43,25 @@ extern RT_TASK th_treatImage;
 extern RT_MUTEX mutex_robotStarted;
 extern RT_MUTEX mutex_move;
 extern RT_MUTEX mutex_Mode;
+extern RT_MUTEX mutex_cameraOpened;
 
 extern RT_SEM sem_barrier;
 extern RT_SEM sem_openComRobot;
 extern RT_SEM sem_serverOk;
 extern RT_SEM sem_startRobot;
+extern RT_SEM sem_openCamera;
 
 extern RT_QUEUE q_messageToMon;
 
 extern int etatCommMoniteur;
 extern int robotStarted;
 extern char move;
-extern char Mode;
+extern int Mode;
+extern int CameraOpened;
+extern Camera Ma_Camera;
+extern Arene Mon_Arene;
+extern Image Mon_Image;
+extern Position Ma_Position;
 //extern int levelBat;
 
 extern int MSG_QUEUE_SIZE;
